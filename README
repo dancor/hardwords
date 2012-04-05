@@ -1,0 +1,23 @@
+SuperGenPass (SGP) is an applet to generate different per-website passwords by
+hashing a master password with the website domain.  However, running the applet
+in the browser runs it in the context of the website, which means any website
+that knows about SGP (or is otherwise checking out modifications on the page)
+can steal your master password.
+
+So this program allows you to run SGP locally.  It works with Xorg and node.js.
+
+SETUP:
+- change the hardcoded path in "pw" to its directory (TODO: fix this)
+- create master_password.js from master_password.js.example
+- run "./pw thesitedomain.com"
+- paste the password into thesitedomain.com's password field
+
+In a bit of trying, I couldn't figure out exactly how SGP's algorithm relates
+to normal MD5 and Base64 algorithms.  Instead I just pulled SGP's javascript
+code and use node.js to run it locally.
+
+In the future, we could try to allow clicking of password field (requires
+digging into Xorg API to figure out how to do this) so that we
+never have to put the password in the clipboard, which could be bad if you
+accidentally paste it somewhere else later or someone is using your computer
+after you and gets it.
