@@ -169,6 +169,6 @@ function gp2_process_uri(URI,DisableTLD) {
 }
 
 exports.gen_pass = function(uri) {
-  master_password = require('./master_password.js').master_password();
+  master_password = require('./master-password.js').master_password();
   return gp2_generate_passwd(master_password + ":" + gp2_process_uri(uri, false), 10);
 }

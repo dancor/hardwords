@@ -5,7 +5,12 @@
 # (even other X programs) as the subprocess progam.  It also works from python
 # (and, here, shellscript) with xclip.  I tried setting "cwd" in the node.js
 # spawn() options.  I tried exec() instead of spawn().
+
 set -e
-cd /home/danl/p/super_gen_pass
-node simple_main.js "$@" | xclip
+
+cd /home/danl/p/super-gen-pass
+nodejs simple-main.js "$@" | tee | xclip
 echo 'in clipboard'
+
+#cd /home/danl/p/super-gen-pass/hs
+#./pw "$@"
