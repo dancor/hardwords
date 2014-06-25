@@ -6,8 +6,10 @@ import qualified Data.ByteString.Char8 as BSC
 import Data.Char
 import Data.List
 import Data.Maybe
+import System.Directory
 import System.Entropy
 import System.Environment
+import System.FilePath
 
 type WdEntry = (BS.ByteString, BS.ByteString)
 
@@ -92,19 +94,42 @@ newMasterPass = do
 
 derivePass :: Dict -> String -> String -> BS.ByteString
 derivePass dict masterPass siteDomain =
-    prettyWebPass59Bit dict . unHash $ scrypt
+    prettyWebPass59Bit dict . getHash $ scrypt
         (fromJust $ scryptParams 16 8 1)
         (Salt $ BS.pack [0..31])
         (Pass . BSC.pack $ masterPass ++ ":" ++ siteDomain)
+
+partitionPass :: Dict -> String -> [[BS.ByteString]]
+partitionPass dict x
+  | xLen == 0 = [[]]
+  | xLen < 3 = []
+  | xLen == 3 = maybe [] (\x -> [[x]]) $ lookup (BSC.pack x) (dict !! 3)
+  | otherwise = poss4 ++ poss3
+  where
+    xLen = length x
+    (x4, rest4) = splitAt 4 x
+    poss4 = maybe [] (\ y -> map (y:) (partitionPass dict rest4)) $
+      lookup (BSC.pack x4) (dict !! 4)
+    (x3, rest3) = splitAt 3 x
+    poss3 = maybe [] (\ y -> map (y:) (partitionPass dict rest3)) $
+      lookup (BSC.pack x3) (dict !! 3)
+
+ptnPass :: String -> IO ()
+ptnPass x = do
+    dict <- loadDict
+    BS.putStr . BSC.unlines . head . partitionPass dict .
+        map toLower $ filter isAlpha x
 
 main :: IO ()
 main = do
     args <- getArgs
     case args of
       ["master"] -> newMasterPass
+      ["show", f] -> readFile f >>= ptnPass
       [siteDomain] -> do
-        putStrLn "Master: "
-        masterPass <- getLine
+        home <- getHomeDirectory
+        masterPass <- head . lines <$> readFile
+            (home </> ".config" </> "scrygen" </> "master-pw")
         dict <- loadDict
         BS.putStr $ derivePass dict masterPass siteDomain
       _ -> error "usage"
