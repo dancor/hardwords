@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 import Control.Applicative
 import Crypto.Scrypt
 import Data.Bits
@@ -6,6 +8,7 @@ import qualified Data.ByteString.Char8 as BSC
 import Data.Char
 import Data.List
 import Data.Maybe
+import Data.Monoid
 import System.Directory
 import System.Entropy
 import System.Environment
@@ -42,7 +45,7 @@ prettyWebPass59Bit :: Dict -> BS.ByteString -> BS.ByteString
 prettyWebPass59Bit dict bs =
     BSC.unlines $
     (BS.concat (fst wd1 : BSC.pack "1" : wd2' : map fst wdRest)) :
-    map snd wds
+    map (("- " <>) . snd) wds
   where
     wd2' = BSC.cons (toUpper wd2Head) wd2Rest
     Just (wd2Head, wd2Rest) = BSC.uncons $ fst wd2
@@ -80,7 +83,7 @@ prettyPass80Bit dict bs =
 
 loadDict :: IO Dict
 loadDict = do
-    let procLine x = (BSC.map toLower . head . BSC.words $ BS.tail x, x)
+    let procLine x = (BSC.map toLower . head $ BSC.words x, x)
     wds3 <- map procLine . BSC.lines <$> BS.readFile "/usr/share/dict/csw3"
     wds4 <- map procLine . BSC.lines <$> BS.readFile "/usr/share/dict/csw4"
     let err = error "Dict only has wds3 and wds4."
