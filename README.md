@@ -10,7 +10,7 @@ xkcd example has a whopping 25 characters for only 44 bits of entropy,
 but is much easier to memorize.
 
 = example use =
-~ ./pw master
+~ ./hardwords master
 cherapslagjolvinyodstor
 CHE dialect version of I, also CH [pron]
 RAP to strike sharply [v RAPPED, RAPPING, RAPS]
@@ -20,7 +20,7 @@ VINY covered with vines [adj VINIER, VINIEST]
 ODS <od=n> [n]
 TOR a high, craggy hill [n -S]
 
-~ ./pw example.com
+~ ./hardwords example.com
 Enter hardwords master password:
 jell1Yebocolhomcru
 - JELL to {congeal=v} [v -ED, -ING, -S]
