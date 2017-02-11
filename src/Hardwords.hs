@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import Control.Applicative
+import Control.Exception
 import Crypto.Scrypt
 import Data.Bits
 import qualified Data.ByteString as BS
@@ -13,6 +14,7 @@ import System.Directory
 import System.Entropy
 import System.Environment
 import System.FilePath
+import System.IO
 
 type WdEntry = (BS.ByteString, BS.ByteString)
 
@@ -64,7 +66,9 @@ prettyWebPass59Bit dict bs =
 
 prettyPass80Bit :: Dict -> BS.ByteString -> BS.ByteString
 prettyPass80Bit dict bs =
-    BSC.unlines $ (BS.concat $ map fst wds) : map snd wds
+    BSC.unlines $
+    (BS.concat $ map fst wds) :
+    map (("- " <>) . snd) wds
   where
     wds = prettyPass
         [ [4, 3, 3, 4, 3, 3, 3]
@@ -92,7 +96,7 @@ loadDict = do
 newMasterPass :: IO ()
 newMasterPass = do
     dict <- loadDict
-    pass <- prettyPass80Bit dict <$> getEntropy 32
+    pass <- prettyPass80Bit dict <$> getEntropy 10
     BSC.putStrLn pass
 
 derivePass :: Dict -> String -> String -> BS.ByteString
@@ -123,6 +127,22 @@ ptnPass x = do
     BS.putStr . BSC.unlines . head . partitionPass dict .
         map toLower $ filter isAlpha x
 
+withEcho :: Bool -> IO a -> IO a
+withEcho echo action = do
+    old <- hGetEcho stdin
+    bracket_ (hSetEcho stdin echo) (hSetEcho stdin old) action
+
+getMasterPass :: IO String
+getMasterPass = do
+    --home <- getHomeDirectory
+    --masterPass <- head . lines <$> readFile
+    --    (home </> ".config" </> "" </> "master-pw")
+    putStr "Enter your hardwords master password: "
+    hFlush stdout
+    masterPass <- withEcho False getLine
+    putChar '\n'
+    return masterPass
+
 main :: IO ()
 main = do
     args <- getArgs
@@ -130,9 +150,7 @@ main = do
       ["master"] -> newMasterPass
       ["show", f] -> readFile f >>= ptnPass
       [siteDomain] -> do
-        home <- getHomeDirectory
-        masterPass <- head . lines <$> readFile
-            (home </> ".config" </> "scrygen" </> "master-pw")
         dict <- loadDict
+        masterPass <- getMasterPass
         BS.putStr $ derivePass dict masterPass siteDomain
       _ -> error "usage"
