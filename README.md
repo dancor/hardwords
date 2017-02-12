@@ -1,5 +1,5 @@
-A very-high-entropy password manager using 3 and 4 letter words and scrypt.
 # hardwords
+A very-high-entropy password manager using 3 and 4 letter words and scrypt.
 
 Many of the 3 and 4 letter words are very obscure, but these passwords are
 very typeable, quite short, and fairly memorable (particularly if you like word
