@@ -2,7 +2,7 @@
 
 import Control.Applicative
 import Control.Exception
-import Crypto.Scrypt
+import qualified Crypto.KDF.Scrypt as S
 import Data.Bits
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BSC
@@ -101,10 +101,10 @@ newMasterPass = do
 
 derivePass :: Dict -> String -> String -> BS.ByteString
 derivePass dict masterPass siteDomain =
-    prettyWebPass59Bit dict . getHash $ scrypt
-        (fromJust $ scryptParams 16 8 1)
-        (Salt $ BS.pack [0..31])
-        (Pass . BSC.pack $ masterPass ++ ":" ++ siteDomain)
+    prettyWebPass59Bit dict $ S.generate
+        (S.Parameters (2^16) 8 1 64)
+        (BSC.pack $ masterPass ++ ":" ++ siteDomain)
+        (BS.pack [0..31])
 
 partitionPass :: Dict -> String -> [[BS.ByteString]]
 partitionPass dict x
