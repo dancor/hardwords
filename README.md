@@ -9,7 +9,8 @@ with 59 bits of entropy. For comparison, the
 xkcd example has a whopping 25 characters for only 44 bits of entropy,
 but is much easier to memorize.
 
-= example use =
+# example use
+```shell
 ~ ./hardwords master
 cherapslagjolvinyodstor
 CHE dialect version of I, also CH [pron]
@@ -19,7 +20,9 @@ JOL to have a good time (S African Slang), JOLLED, JOLLING, JOLS [v -ED, -ING, -
 VINY covered with vines [adj VINIER, VINIEST]
 ODS <od=n> [n]
 TOR a high, craggy hill [n -S]
+```
 
+```shell
 ~ ./hardwords example.com
 Enter hardwords master password:
 jell1Yebocolhomcru
@@ -28,19 +31,20 @@ jell1Yebocolhomcru
 - COL a depression between two mountains [n -S]
 - HOM a sacred plant of the ancient Persians, also HOMA [n -S]
 - CRU a {vineyard=n} [n -S]
+```
 
-= references =
+# references
 - https://xkcd.com/936
 - https://en.wikipedia.org/wiki/Scrypt
 
-= dependencies =
+# dependencies
 - You need ghc and the haskell package "scrypt". scrypt-0.5.0 was current at this writing.
 
-= installation =
+# installation
 ~ sudo cp dict/csw3 dict/csw4 /usr/share/dict
 ~ make
 
-= competitors =
+# competitors
 - https://xkpasswd.net/s/
   - By default, you still have to memorize numbers and symbols and only uses 3
     long words.
@@ -52,8 +56,18 @@ jell1Yebocolhomcru
 - https://github.com/redacted/XKCD-password-generator
 - http://correcthorsebatterystaple.net/
 - http://vakila.github.io/rc-projects/xkcd-pass/
+- https://www.schneier.com/blog/archives/2014/03/choosing_secure_1.html
+  - This seems fairly good if you can't use a password generator program
+    and instead you have to generate your password totally on your own.
+    However, it's really hard to determine the exact entropy of the result.
+    It's not hard to imagine that the entropy could be quite low and that
+    this could be attacked, in our age of Deep Learning, if not more naively.
+    Word-list-based password generation gives an exact and provable entropy
+    level.
+  - Having one master password may be more user friendly than this system of
+    all totally separate passwords. Actually this applies to every system here.
 
-= todo =
+# todo
 - Reconcile the 80-bit/59-bit discepancy; actually create more options so
   that people can get the particular ease/security trade-off they want?
 - Switch from scrypt to cryptonite since that's more readily available?
