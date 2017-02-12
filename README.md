@@ -9,7 +9,7 @@ with 59 bits of entropy. For comparison, the
 xkcd example has a whopping 25 characters for only 44 bits of entropy,
 but is much easier to memorize.
 
-# example use
+## example use
 ```shell
 ~ ./hardwords master
 cherapslagjolvinyodstor
@@ -24,7 +24,7 @@ TOR a high, craggy hill [n -S]
 
 ```shell
 ~ ./hardwords example.com
-Enter hardwords master password:
+Enter hardwords master password: [user enters cherapslagjolvinyodstor]
 jell1Yebocolhomcru
 - JELL to {congeal=v} [v -ED, -ING, -S]
 - YEBO yes [interj]
@@ -33,18 +33,18 @@ jell1Yebocolhomcru
 - CRU a {vineyard=n} [n -S]
 ```
 
-# references
+## references
 - https://xkcd.com/936
 - https://en.wikipedia.org/wiki/Scrypt
 
-# dependencies
+## dependencies
 - You need ghc and the haskell package "scrypt". scrypt-0.5.0 was current at this writing.
 
-# installation
+## installation
 ~ sudo cp dict/csw3 dict/csw4 /usr/share/dict
 ~ make
 
-# competitors
+## competitors
 - https://xkpasswd.net/s/
   - By default, you still have to memorize numbers and symbols and only uses 3
     long words.
@@ -67,7 +67,7 @@ jell1Yebocolhomcru
   - Having one master password may be more user friendly than this system of
     all totally separate passwords. Actually this applies to every system here.
 
-# todo
+## todo
 - Reconcile the 80-bit/59-bit discepancy; actually create more options so
   that people can get the particular ease/security trade-off they want?
 - Switch from scrypt to cryptonite since that's more readily available?
