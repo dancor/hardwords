@@ -1,4 +1,6 @@
 A very-high-entropy password manager using 3 and 4 letter words and scrypt.
+# hardwords
+
 Many of the 3 and 4 letter words are very obscure, but these passwords are
 very typeable, quite short, and fairly memorable (particularly if you like word
 games or obscure english words) given their very high entropy.
