@@ -41,7 +41,10 @@ jell1Yebocolhomcru
 - https://en.wikipedia.org/wiki/Scrypt
 
 ## dependencies
-- You need ghc and the haskell package "scrypt". scrypt-0.5.0 was current at this writing.
+- On Ubuntu:
+```shell
+~ sudo apt-get install haskell-platform libghc-cryptonite-dev libghc-entropy-dev
+```
 
 ## installation
 ```shell
