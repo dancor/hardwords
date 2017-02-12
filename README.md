@@ -78,8 +78,6 @@ jell1Yebocolhomcru
 ## todo
 - Reconcile the 80-bit/59-bit discepancy; actually create more options so
   that people can get the particular ease/security trade-off they want?
-- Switch from scrypt to cryptonite since that's more readily available?
-  It has an Ubuntu package for example.
 - Switch to the Enable wordlist?
 - Hard code the dictionaries into the program so the executable is fully
   standalone?
