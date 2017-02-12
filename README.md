@@ -10,6 +10,7 @@ xkcd example has a whopping 25 characters for only 44 bits of entropy,
 but is much easier to memorize.
 
 ## example use
+- Generating a master password initially:
 ```shell
 ~ ./hardwords master
 cherapslagjolvinyodstor
@@ -21,7 +22,7 @@ VINY covered with vines [adj VINIER, VINIEST]
 ODS <od=n> [n]
 TOR a high, craggy hill [n -S]
 ```
-
+- Day-to-day use for derived passwords:
 ```shell
 ~ ./hardwords example.com
 Enter hardwords master password: [user enters cherapslagjolvinyodstor]
@@ -41,8 +42,10 @@ jell1Yebocolhomcru
 - You need ghc and the haskell package "scrypt". scrypt-0.5.0 was current at this writing.
 
 ## installation
+```shell
 ~ sudo cp dict/csw3 dict/csw4 /usr/share/dict
 ~ make
+```
 
 ## competitors
 - https://xkpasswd.net/s/
