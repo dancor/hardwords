@@ -10,6 +10,7 @@ import Data.Char
 import Data.List
 import Data.Maybe
 import Data.Monoid
+import Options.Applicative
 import System.Directory
 import System.Entropy
 import System.Environment
@@ -93,12 +94,6 @@ loadDict = do
     let err = error "Dict only has wds3 and wds4."
     return [err, err, err, wds3, wds4]
 
-newMasterPass :: IO ()
-newMasterPass = do
-    dict <- loadDict
-    pass <- prettyPass80Bit dict <$> getEntropy 10
-    BSC.putStrLn pass
-
 derivePass :: Dict -> String -> String -> BS.ByteString
 derivePass dict masterPass siteDomain =
     prettyWebPass59Bit dict $ S.generate
@@ -134,23 +129,39 @@ withEcho echo action = do
 
 getMasterPass :: IO String
 getMasterPass = do
-    --home <- getHomeDirectory
-    --masterPass <- head . lines <$> readFile
-    --    (home </> ".config" </> "" </> "master-pw")
     putStr "Enter your hardwords master password: "
     hFlush stdout
     masterPass <- withEcho False getLine
     putChar '\n'
     return masterPass
 
+data Opts = Opts
+  { oNewMasterPass :: Bool
+  , oAsInt         :: Bool
+  --  , oAsRangeInt    :: Bool
+  , oSiteDomain    :: Maybe String
+  }
+
+opts :: Parser Opts
+opts = Opts
+    <$> switch (long "new-master-password"
+        <> help "To generate a new master password")
+    <*> switch (long "as-integer"
+        <> help "Generate an integer instead of a passphrase")
+    <*> optional (argument str $ metavar "WEBSITE-DOMAIN")
+
 main :: IO ()
-main = do
-    args <- getArgs
-    case args of
-      ["master"] -> newMasterPass
-      ["show", f] -> readFile f >>= ptnPass
-      [siteDomain] -> do
-        dict <- loadDict
+main = hardwords =<< execParser (info (opts <**> helper) $
+    fullDesc <> progDesc "descc" <> header "headerr")
+
+hardwords :: Opts -> IO ()
+hardwords opts = do
+    dict <- loadDict
+    case (oNewMasterPass opts, oSiteDomain opts) of
+      (True, Nothing) -> do
+        pass <- prettyPass80Bit dict <$> getEntropy 10
+        BSC.putStrLn pass
+      (False, Just siteDomain) -> do
         masterPass <- getMasterPass
         BS.putStr $ derivePass dict masterPass siteDomain
-      _ -> error "usage"
+      _ -> error "Usage"
