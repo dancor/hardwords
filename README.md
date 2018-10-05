@@ -60,7 +60,7 @@ jell1Yebocolhomcru
     security, typeability, and memorization.
     This site does tell you entropy bits which is good
     (the "full knowledge" one counts), and you can massage the many settings
-    to some extent. Actually all of these have competitors have similar issues.
+    to some extent. Actually all of these competitors have similar issues.
 - https://github.com/redacted/XKCD-password-generator
 - http://correcthorsebatterystaple.net/
 - http://vakila.github.io/rc-projects/xkcd-pass/
