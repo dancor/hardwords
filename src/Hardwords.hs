@@ -4,8 +4,8 @@ import Control.Applicative
 import Control.Exception
 import qualified Crypto.KDF.Scrypt as S
 import Data.Bits
-import qualified Data.ByteString as BS
-import qualified Data.ByteString.Char8 as BSC
+import qualified Data.ByteString as B
+import qualified Data.ByteString.Char8 as B8
 import Data.Char
 import Data.List
 import Data.Maybe
@@ -17,20 +17,20 @@ import System.Environment
 import System.FilePath
 import System.IO
 
-type WdEntry = (BS.ByteString, BS.ByteString)
+type WdEntry = (B.ByteString, B.ByteString)
 
 type Dict = [[WdEntry]]
 
 -- Little-endian:
--- > bsToInteger (BS.pack [1,0])
+-- > bsToInteger (B.pack [1,0])
 -- 1
--- > bsToInteger (BS.pack [0,2])
+-- > bsToInteger (B.pack [0,2])
 -- 512
-bsToInteger :: BS.ByteString -> Integer
+bsToInteger :: B.ByteString -> Integer
 bsToInteger =
-    BS.foldl' (\i b -> (i `shiftL` 8) + fromIntegral b) 0 . BS.reverse
+    B.foldl' (\i b -> (i `shiftL` 8) + fromIntegral b) 0 . B.reverse
 
-prettyPass :: [[Int]] -> Dict -> BS.ByteString -> [WdEntry]
+prettyPass :: [[Int]] -> Dict -> B.ByteString -> [WdEntry]
 prettyPass wdLensOptions dict bs =
     snd $ mapAccumL genWd quot1 wdLens
   where
@@ -44,14 +44,14 @@ prettyPass wdLensOptions dict bs =
         possWds = dict !! wdLen
         (quot', wdN) = quot `quotRem` fromIntegral (length possWds)
 
-prettyWebPass59Bit :: Dict -> BS.ByteString -> BS.ByteString
+prettyWebPass59Bit :: Dict -> B.ByteString -> B.ByteString
 prettyWebPass59Bit dict bs =
-    BSC.unlines $
-    (BS.concat (fst wd1 : BSC.pack "1" : wd2' : map fst wdRest)) :
+    B8.unlines $
+    (B.concat (fst wd1 : "1" : wd2' : map fst wdRest)) :
     map (("- " <>) . snd) wds
   where
-    wd2' = BSC.cons (toUpper wd2Head) wd2Rest
-    Just (wd2Head, wd2Rest) = BSC.uncons $ fst wd2
+    wd2' = B8.cons (toUpper wd2Head) wd2Rest
+    Just (wd2Head, wd2Rest) = B8.uncons $ fst wd2
     wds@(wd1:wd2:wdRest) = prettyPass
         [ [4, 4, 3, 3, 3]
         , [4, 3, 4, 3, 3]
@@ -65,10 +65,10 @@ prettyWebPass59Bit dict bs =
         , [3, 3, 3, 4, 4]
         ] dict bs
 
-prettyPass80Bit :: Dict -> BS.ByteString -> BS.ByteString
+prettyPass80Bit :: Dict -> B.ByteString -> B.ByteString
 prettyPass80Bit dict bs =
-    BSC.unlines $
-    (BS.concat $ map fst wds) :
+    B8.unlines $
+    (B.concat $ map fst wds) :
     map (("- " <>) . snd) wds
   where
     wds = prettyPass
@@ -88,38 +88,39 @@ prettyPass80Bit dict bs =
 
 loadDict :: IO Dict
 loadDict = do
-    let procLine x = (BSC.map toLower . head $ BSC.words x, x)
-    wds3 <- map procLine . BSC.lines <$> BS.readFile "/usr/share/dict/csw3"
-    wds4 <- map procLine . BSC.lines <$> BS.readFile "/usr/share/dict/csw4"
+    let procLine x = (B8.map toLower . head $ B8.words x, x)
+    wds3 <- map procLine . B8.lines <$> B.readFile "/usr/share/dict/csw3"
+    wds4 <- map procLine . B8.lines <$> B.readFile "/usr/share/dict/csw4"
     let err = error "Dict only has wds3 and wds4."
     return [err, err, err, wds3, wds4]
 
-derivePass :: Dict -> String -> String -> BS.ByteString
+derivePass :: Dict -> String -> String -> B.ByteString
 derivePass dict masterPass siteDomain =
     prettyWebPass59Bit dict $ S.generate
+    --S.generate
         (S.Parameters (2^16) 8 1 64)
-        (BSC.pack $ masterPass ++ ":" ++ siteDomain)
-        (BS.pack [0..31])
+        (B8.pack $ masterPass ++ ":" ++ siteDomain)
+        (B.pack [0..31])
 
-partitionPass :: Dict -> String -> [[BS.ByteString]]
+partitionPass :: Dict -> String -> [[B.ByteString]]
 partitionPass dict x
   | xLen == 0 = [[]]
   | xLen < 3 = []
-  | xLen == 3 = maybe [] (\x -> [[x]]) $ lookup (BSC.pack x) (dict !! 3)
+  | xLen == 3 = maybe [] (\x -> [[x]]) $ lookup (B8.pack x) (dict !! 3)
   | otherwise = poss4 ++ poss3
   where
     xLen = length x
     (x4, rest4) = splitAt 4 x
     poss4 = maybe [] (\ y -> map (y:) (partitionPass dict rest4)) $
-      lookup (BSC.pack x4) (dict !! 4)
+      lookup (B8.pack x4) (dict !! 4)
     (x3, rest3) = splitAt 3 x
     poss3 = maybe [] (\ y -> map (y:) (partitionPass dict rest3)) $
-      lookup (BSC.pack x3) (dict !! 3)
+      lookup (B8.pack x3) (dict !! 3)
 
 ptnPass :: String -> IO ()
 ptnPass x = do
     dict <- loadDict
-    BS.putStr . BSC.unlines . head . partitionPass dict .
+    B.putStr . B8.unlines . head . partitionPass dict .
         map toLower $ filter isAlpha x
 
 withEcho :: Bool -> IO a -> IO a
@@ -138,7 +139,7 @@ getMasterPass = do
 data Opts = Opts
   { oNewMasterPass :: Bool
   , oAsInt         :: Bool
-  --  , oAsRangeInt    :: Bool
+  --, oAsRangeInt    :: Bool
   , oSiteDomain    :: Maybe String
   }
 
@@ -150,9 +151,12 @@ opts = Opts
         <> help "Generate an integer instead of a passphrase")
     <*> optional (argument str $ metavar "WEBSITE-DOMAIN")
 
+optsInfo :: ParserInfo Opts
+optsInfo = info (opts <**> helper) $
+    fullDesc <> progDesc "descc" <> header "headerr"
+
 main :: IO ()
-main = hardwords =<< execParser (info (opts <**> helper) $
-    fullDesc <> progDesc "descc" <> header "headerr")
+main = hardwords =<< customExecParser (prefs showHelpOnEmpty) optsInfo
 
 hardwords :: Opts -> IO ()
 hardwords opts = do
@@ -160,8 +164,15 @@ hardwords opts = do
     case (oNewMasterPass opts, oSiteDomain opts) of
       (True, Nothing) -> do
         pass <- prettyPass80Bit dict <$> getEntropy 10
-        BSC.putStrLn pass
+        B8.putStrLn pass
       (False, Just siteDomain) -> do
         masterPass <- getMasterPass
-        BS.putStr $ derivePass dict masterPass siteDomain
+        let pass = derivePass dict masterPass siteDomain
+            i = bsToInteger pass
+            --rLow = 1024
+            --rHigh = 65535
+            rLow = 1
+            rHigh = 1023
+        --print $ rLow + i `mod` (rHigh + 1 - rLow)
+        B8.putStrLn pass
       _ -> error "Usage"
