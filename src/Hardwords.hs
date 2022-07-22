@@ -161,18 +161,16 @@ main = hardwords =<< customExecParser (prefs showHelpOnEmpty) optsInfo
 hardwords :: Opts -> IO ()
 hardwords opts = do
     dict <- loadDict
-    case (oNewMasterPass opts, oSiteDomain opts) of
-      (True, Nothing) -> do
+    case (oNewMasterPass opts, oAsInt opts, oSiteDomain opts) of
+      (True, False, Nothing) -> do
         pass <- prettyPass80Bit dict <$> getEntropy 10
         B8.putStrLn pass
-      (False, Just siteDomain) -> do
+      (False, False, Just siteDomain) -> do
         masterPass <- getMasterPass
         let pass = derivePass dict masterPass siteDomain
             i = bsToInteger pass
-            --rLow = 1024
-            --rHigh = 65535
-            rLow = 1
-            rHigh = 1023
-        --print $ rLow + i `mod` (rHigh + 1 - rLow)
+            rLow = 1024
+            rHigh = 65535
+        putStrLn $ "Port " ++ show (rLow + i `mod` (rHigh + 1 - rLow))
         B8.putStrLn pass
       _ -> error "Usage"
